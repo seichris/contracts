@@ -113,15 +113,14 @@ contract CurrencyNetwork is ERC223 {
         string _tokenSymbol,
         uint16 _network_fee_divisor,
         uint16 _capacity_fee_divisor,
-        uint16 _imbalance_fee_divisor,
-        uint16 _maxInterestRate
-    ) {
+        uint16 _imbalance_fee_divisor
+    ) external {
+        require(network_fee_divisor == 0);
         name = _tokenName;       // Set the name for display purposes
         symbol = _tokenSymbol;   // Set the symbol for display purposes
         network_fee_divisor = _network_fee_divisor;
         capacity_fee_divisor = _capacity_fee_divisor;
         imbalance_fee_divisor = _imbalance_fee_divisor;
-        //maxInterestRate = _maxInterestRate;
     }
 
     /*

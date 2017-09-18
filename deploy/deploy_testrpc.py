@@ -52,26 +52,24 @@ def main():
     wait(transfer_filter)
     log_entries = transfer_filter.get()
     addr_trustlines = log_entries[0]['args']['_currencyNetworkContract']
+    addr_resolver = log_entries[0]['args']['_resolver']
+    addr_real = log_entries[0]['args']['_real']
     print("Real CurrencyNetwork contract address is", addr_trustlines)
 
-    resolver = deploy("Resolver", chain, addr_trustlines)
-    receipt = check_successful_tx(web3, txid)
+    resolver = chain.provider.get_contract_factory("Resolver")(addr_resolver)
     transfer_filter = resolver.on("FallbackChanged")
-    proxy = deploy("EtherRouter", chain, resolver.address)
-    proxied_trustlines = chain.provider.get_contract_factory("CurrencyNetwork")(proxy.address)
-    txid = proxied_trustlines.transact({"from": web3.eth.accounts[0]}).init('Trustlines', 'T', 1000, 100, 25, 100)
+    proxied_trustlines = chain.provider.get_contract_factory("CurrencyNetwork")(addr_trustlines)
+    txid = resolver.transact({"from": web3.eth.accounts[0]}).registerLengthFunction("getUsers()", "getUsersReturnSize()", addr_real);
     receipt = check_successful_tx(web3, txid)
-    txid = resolver.transact({"from": web3.eth.accounts[0]}).registerLengthFunction("getUsers()", "getUsersReturnSize()", addr_trustlines);
+    txid = resolver.transact({"from": web3.eth.accounts[0]}).registerLengthFunction("getFriends(address)", "getFriendsReturnSize(address)", addr_real);
     receipt = check_successful_tx(web3, txid)
-    txid = resolver.transact({"from": web3.eth.accounts[0]}).registerLengthFunction("getFriends(address)", "getFriendsReturnSize(address)", addr_trustlines);
+    txid = resolver.transact({"from": web3.eth.accounts[0]}).registerLengthFunction("trustline(address,address)", "trustlineLen(address,address)", addr_real);
     receipt = check_successful_tx(web3, txid)
-    txid = resolver.transact({"from": web3.eth.accounts[0]}).registerLengthFunction("trustline(address,address)", "trustlineLen(address,address)", addr_trustlines);
+    txid = resolver.transact({"from": web3.eth.accounts[0]}).registerLengthFunction("getAccountExt(address,address)", "getAccountExtLen()", addr_real);
     receipt = check_successful_tx(web3, txid)
-    txid = resolver.transact({"from": web3.eth.accounts[0]}).registerLengthFunction("getAccountExt(address,address)", "getAccountExtLen()", addr_trustlines);
+    txid = resolver.transact({"from": web3.eth.accounts[0]}).registerLengthFunction("name()", "nameLen()", addr_real);
     receipt = check_successful_tx(web3, txid)
-    txid = resolver.transact({"from": web3.eth.accounts[0]}).registerLengthFunction("name()", "nameLen()", addr_trustlines);
-    receipt = check_successful_tx(web3, txid)
-    txid = resolver.transact({"from": web3.eth.accounts[0]}).registerLengthFunction("symbol()", "symbolLen()", addr_trustlines);
+    txid = resolver.transact({"from": web3.eth.accounts[0]}).registerLengthFunction("symbol()", "symbolLen()", addr_real);
     receipt = check_successful_tx(web3, txid)
 
     print("\n\naddress for accessing CurrencyNetwork through Proxy: ", proxied_trustlines.address, '\n\n')

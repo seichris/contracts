@@ -33,13 +33,14 @@ def trustlines_contract(chain, web3):
     wait(transfer_filter)
     log_entries = transfer_filter.get()
     addr_trustlines = log_entries[0]['args']['_currencyNetworkContract']
-    print("REAL CurrencyNetwork contract address is", addr_trustlines)
+    addr_real = log_entries[0]['args']['_real']
+    addr_resolver = log_entries[0]['args']['_resolver']
+    print("CurrencyNetwork proxy contract address is", addr_trustlines)
 
-    resolver = deploy("Resolver", chain, addr_trustlines)
-    txid = resolver.transact({"from": web3.eth.accounts[0]}).registerLengthFunction("getAccountExt(address,address)", "getAccountExtLen()", addr_trustlines);
+    resolver = chain.provider.get_contract_factory("Resolver")(addr_resolver)
+    txid = resolver.transact({"from": web3.eth.accounts[0]}).registerLengthFunction("getAccountExt(address,address)", "getAccountExtLen()", addr_real);
     transfer_filter = resolver.on("FallbackChanged")
-    proxy = deploy("EtherRouter", chain, resolver.address)
-    proxied_trustlines = chain.provider.get_contract_factory("CurrencyNetwork")(proxy.address)
+    proxied_trustlines = chain.provider.get_contract_factory("CurrencyNetwork")(addr_trustlines)
     txid = proxied_trustlines.transact({"from": web3.eth.accounts[0]}).setAccount(web3.eth.accounts[7], web3.eth.accounts[8], 2000000, 1, 1, 1, 1, 1, 1, 1);
     print(proxied_trustlines.call().getAccountExt(web3.eth.accounts[7], web3.eth.accounts[8]))
 
@@ -54,8 +55,6 @@ def trustlines_contract(chain, web3):
     wait(transfer_filter)
     log_entries = transfer_filter.get()
     print("Forwarded to ", log_entries[0]['args']['newFallback'])
-    txid = proxied_trustlines.transact({"from": web3.eth.accounts[0]}).init('Trustlines', 'T', 1000, 100, 25, 100);
-
     print(proxied_trustlines.call().getAccountExt(web3.eth.accounts[7], web3.eth.accounts[8]))
 
     trustlines_contract = proxied_trustlines

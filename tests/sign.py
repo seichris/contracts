@@ -17,8 +17,10 @@ def sign(data: bytes, private_key_seed_ascii: str):
     signature = signature[0] + utils.bytearray_to_bytestr([signature[1]])
     return signature, eth_privtoaddr(private_key_seed_ascii)
 
+
 def check(data: bytes, pk: bytes):
     return sign(data, pk)
+
 
 if __name__ == "__main__":
     valueFromSha3Of = "0x847db6e753ecd05088c44ff58afe6beb093c70710032e267844ac49def3746a9"
