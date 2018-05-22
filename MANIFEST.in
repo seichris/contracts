@@ -1,4 +1,6 @@
 include README.md
+include VERSION
 include requirements.txt
-recursive-include contracts
+include build/contracts.json
+recursive-include contracts *.sol
 include populus.json

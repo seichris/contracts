@@ -10,7 +10,7 @@ from setuptools.command.build_py import build_py
 # To use a consistent encoding
 from codecs import open
 from os import path, listdir
-
+import shutil
 
 here = path.abspath(path.dirname(__file__))
 
@@ -42,11 +42,13 @@ class CompileContracts(Command):
         pass
 
     def run(self):
+        if os.path.exists('contracts.json'):
+            return
         from populus import Project
         from populus.api.compile_contracts import compile_project
         project = Project()
         compile_project(project, False)
-
+        shutil.copy2("build/contracts.json", "contracts.json")
 
 def list_files(dir_path):
     base_dir = path.join(here, dir_path)
@@ -116,6 +118,7 @@ setup(
     install_requires=['populus',
                       'web3', ],
 
+    setup_requires=['populus'],
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
     # for example:
@@ -134,7 +137,7 @@ setup(
     # http://docs.python.org/3.4/distutils/setupscript.html#installing-additional-files # noqa
     # In this case, 'data_file' will be installed into '<sys.prefix>/my_data'
     data_files=[('trustlines-contracts', ['project.json']),
-                ('trustlines-contracts/build', ['build/contracts.json']),
+                ('trustlines-contracts/build', ['contracts.json']),
                 ('trustlines-contracts/contracts', list_files('contracts')),
                 ('trustlines-contracts/contracts/lib', list_files('contracts/lib')),
                 ('trustlines-contracts/contracts/tokens', list_files('contracts/tokens')),
